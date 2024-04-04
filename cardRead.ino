@@ -1,16 +1,3 @@
-/**
-* Read a card using a mfrc522 reader on your SPI interface
-* Pin layout should be as follows (on Arduino Uno):
-* MOSI: Pin 11 / ICSP-4
-* MISO: Pin 12 / ICSP-1
-* SCK: Pin 13 / ISCP-3
-* SS: Pin 10
-* RST: Pin 9
-*
-* Script is based on the script of Fancello Salvatore. 
-* New cardnumber is printed when card has changed. Only a dot is printed
-* if card is the same.
-*/
 #include <SPI.h>
 #include <RFID.h>
 
@@ -19,42 +6,48 @@
 
 RFID rfid(SS_PIN, RST_PIN); 
 
-// Setup variables:
-    int serNum0;
-    int serNum1;
-    int serNum2;
-    int serNum3;
-    int serNum4;
+// Variabili per memorizzare il codice della tessera
+int serNum0;
+int serNum1;
+int serNum2;
+int serNum3;
+int serNum4;
 
 void setup()
 { 
+  // Inizializzazione della comunicazione seriale
   Serial.begin(9600);
+  // Inizializzazione della comunicazione SPI
   SPI.begin(); 
-  rfid.init();
-  
+  // Inizializzazione del lettore RFID
+  rfid.init();  
 }
 
 void loop()
 {
-    
+    // Verifica se è presente una tessera
     if (rfid.isCard()) {
+        // Legge il codice della tessera
         if (rfid.readCardSerial()) {
+            // Controlla se il codice è diverso da quello memorizzato
             if (rfid.serNum[0] != serNum0
                 && rfid.serNum[1] != serNum1
                 && rfid.serNum[2] != serNum2
                 && rfid.serNum[3] != serNum3
                 && rfid.serNum[4] != serNum4
             ) {
-                /* With a new cardnumber, show it. */
+                // Stampa il messaggio "Card found" se la tessera è nuova
                 Serial.println(" ");
                 Serial.println("Card found");
+                // Aggiorna i valori del codice memorizzato
                 serNum0 = rfid.serNum[0];
                 serNum1 = rfid.serNum[1];
                 serNum2 = rfid.serNum[2];
                 serNum3 = rfid.serNum[3];
                 serNum4 = rfid.serNum[4];
                
-                //Serial.println(" ");
+                // Stampa il codice decimale della tessera
+                Serial.println(" ");
                 Serial.println("Cardnumber:");
                 Serial.print("Dec: ");
 		Serial.print(rfid.serNum[0],DEC);
@@ -68,6 +61,7 @@ void loop()
 		Serial.print(rfid.serNum[4],DEC);
                 Serial.println(" ");
                         
+                // Stampa il codice esadecimale della tessera
                 Serial.print("Hex: ");
 		Serial.print(rfid.serNum[0],HEX);
                 Serial.print(", ");
@@ -80,12 +74,12 @@ void loop()
 		Serial.print(rfid.serNum[4],HEX);
                 Serial.println(" ");
              } else {
-               /* If we have the same ID, just write a dot. */
+               // Stampa un punto se la tessera è la stessa
                Serial.print(".");
              }
           }
     }
     
+    // Pulisce il lettore RFID in attesa di una nuova lettura
     rfid.halt();
 }
-
